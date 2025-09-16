@@ -82,6 +82,7 @@ const quizData = [
 ];
 
 const leaderboardStorageKey = "pgrCocktailQuizLeaderboard";
+const defaultPlayerName = "Anonymous";
 
 const state = {
   currentQuestion: 0,
@@ -153,7 +154,7 @@ function normaliseEntry(entry) {
   const name =
     typeof entry.name === "string" && entry.name.trim()
       ? entry.name.trim().slice(0, 40)
-      : "Anonymous";
+      : defaultPlayerName;
 
   return {
     name,
@@ -170,11 +171,13 @@ function loadLeaderboard() {
     elements.storageWarning.classList.remove("hidden");
     elements.storageWarning.textContent =
       "Local storage is disabled, so the leaderboard will reset when you refresh the page. Copy the exported data to save it elsewhere.";
+    setLeaderboardStatus("");
     return;
   }
 
   elements.storageWarning.classList.add("hidden");
   elements.storageWarning.textContent = "";
+  setLeaderboardStatus("");
 
   const stored = window.localStorage.getItem(leaderboardStorageKey);
   if (!stored) {
@@ -185,13 +188,25 @@ function loadLeaderboard() {
   try {
     const parsed = JSON.parse(stored);
     if (Array.isArray(parsed)) {
-      state.leaderboard = parsed.map(normaliseEntry).filter(Boolean);
+      const cleaned = parsed.map(normaliseEntry).filter(Boolean);
+      const duplicatesRemoved = applyLeaderboardEntries(cleaned);
+
+      if (duplicatesRemoved > 0) {
+        saveLeaderboard();
+        setLeaderboardStatus(
+          `${duplicatesRemoved} duplicate ${duplicatesRemoved === 1 ? "entry was" : "entries were"} removed from saved leaderboard data.`
+        );
+      }
     } else {
       state.leaderboard = [];
+      saveLeaderboard();
+      setLeaderboardStatus("Saved leaderboard data was invalid and has been reset.");
     }
   } catch (error) {
     console.error("Unable to parse leaderboard data", error);
     state.leaderboard = [];
+    saveLeaderboard();
+    setLeaderboardStatus("Saved leaderboard data was invalid and has been reset.");
   }
 }
 
@@ -209,6 +224,72 @@ function saveLeaderboard() {
 
 function formatSeconds(seconds) {
   return seconds.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function isCandidatePreferred(candidate, current) {
+  if (candidate.score !== current.score) {
+    return candidate.score > current.score;
+  }
+
+  if (candidate.maxScore !== current.maxScore) {
+    return candidate.maxScore > current.maxScore;
+  }
+
+  if (candidate.durationSeconds !== current.durationSeconds) {
+    return candidate.durationSeconds < current.durationSeconds;
+  }
+
+  if (current.name === defaultPlayerName && candidate.name !== defaultPlayerName) {
+    return true;
+  }
+
+  if (candidate.name === defaultPlayerName && current.name !== defaultPlayerName) {
+    return false;
+  }
+
+  if (candidate.name.length !== current.name.length) {
+    return candidate.name.length > current.name.length;
+  }
+
+  return candidate.completedAt < current.completedAt;
+}
+
+function dedupeLeaderboardEntries(entries) {
+  const uniqueEntries = [];
+  const seen = new Map();
+  let duplicatesRemoved = 0;
+
+  entries.forEach((entry) => {
+    if (!entry) {
+      return;
+    }
+
+    const key = `${entry.completedAt}-${entry.name.toLowerCase()}`;
+    const existing = seen.get(key);
+
+    if (!existing) {
+      const index = uniqueEntries.length;
+      seen.set(key, { entry, index });
+      uniqueEntries.push(entry);
+      return;
+    }
+
+    duplicatesRemoved += 1;
+
+    if (isCandidatePreferred(entry, existing.entry)) {
+      uniqueEntries[existing.index] = entry;
+      seen.set(key, { entry, index: existing.index });
+    }
+  });
+
+  return { entries: uniqueEntries, duplicatesRemoved };
+}
+
+function applyLeaderboardEntries(entries) {
+  const source = Array.isArray(entries) ? entries : [];
+  const { entries: uniqueEntries, duplicatesRemoved } = dedupeLeaderboardEntries(source);
+  state.leaderboard = uniqueEntries;
+  return duplicatesRemoved;
 }
 
 function renderLeaderboard() {
@@ -379,7 +460,7 @@ function submitScore(event) {
     return;
   }
 
-  const name = elements.playerName.value.trim() || "Anonymous";
+  const name = elements.playerName.value.trim() || defaultPlayerName;
   const durationSeconds = Number(elements.scoreForm.dataset.duration || "0");
 
   const newEntry = normaliseEntry({
@@ -395,7 +476,7 @@ function submitScore(event) {
     return;
   }
 
-  state.leaderboard.push(newEntry);
+  const duplicatesRemoved = applyLeaderboardEntries([...state.leaderboard, newEntry]);
   state.scoreSubmitted = true;
   saveLeaderboard();
   renderLeaderboard();
@@ -403,6 +484,12 @@ function submitScore(event) {
   elements.scoreSubmittedMessage.textContent = `${name}, your score has been added to the leaderboard!`;
   elements.scoreSubmittedMessage.classList.remove("hidden");
   elements.scoreForm.querySelector('button[type="submit"]').disabled = true;
+
+  if (duplicatesRemoved > 0) {
+    setLeaderboardStatus("Existing leaderboard entry updated with the latest details.");
+  } else {
+    setLeaderboardStatus("Score added to the leaderboard.");
+  }
 }
 
 function exportLeaderboard() {
@@ -443,11 +530,21 @@ function importLeaderboard() {
     }
 
     const cleaned = parsed.map(normaliseEntry).filter(Boolean);
+    const combined = [...state.leaderboard, ...cleaned];
+    const duplicatesRemoved = applyLeaderboardEntries(combined);
 
-    state.leaderboard = [...state.leaderboard, ...cleaned];
     saveLeaderboard();
     renderLeaderboard();
-    setLeaderboardStatus("Leaderboard updated with imported scores.");
+
+    if (duplicatesRemoved > 0) {
+      setLeaderboardStatus(
+        `Leaderboard updated with imported scores. ${duplicatesRemoved} duplicate ${
+          duplicatesRemoved === 1 ? "entry was" : "entries were"
+        } ignored.`
+      );
+    } else {
+      setLeaderboardStatus("Leaderboard updated with imported scores.");
+    }
   } catch (error) {
     console.error("Import failed", error);
     setLeaderboardStatus("Import failed. Please check that you pasted valid JSON data.");
