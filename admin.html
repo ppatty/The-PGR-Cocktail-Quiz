@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cocktail Quiz Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="admin-page">
+  <header class="page-header">
+    <h1>Quiz Content Admin</h1>
+    <p class="tagline">Curate the cocktail trivia served to your players.</p>
+    <div class="cocktail-strip" aria-hidden="true">
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="admin-martini" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fde68a" />
+              <stop offset="100%" stop-color="#f97316" />
+            </linearGradient>
+          </defs>
+          <polygon points="24 22 96 22 60 74" fill="url(#admin-martini)" opacity="0.85"></polygon>
+          <polygon points="24 22 96 22 60 74" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="4"></polygon>
+          <line x1="60" y1="74" x2="60" y2="128" stroke="rgba(255,255,255,0.85)" stroke-width="6" stroke-linecap="round"></line>
+          <ellipse cx="60" cy="140" rx="24" ry="8" fill="rgba(148,163,184,0.45)"></ellipse>
+          <line x1="60" y1="74" x2="102" y2="36" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"></line>
+          <circle cx="98" cy="40" r="7" fill="#22c55e"></circle>
+        </svg>
+      </div>
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="admin-sunset" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f472b6" />
+              <stop offset="100%" stop-color="#9333ea" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M48 18 Q36 48 48 80 Q54 98 52 116 Q50 130 44 142 Q42 146 48 146 H82 Q88 146 86 140 Q80 126 78 116 Q76 98 84 80 Q94 48 76 18 Z"
+            fill="url(#admin-sunset)"
+            opacity="0.82"
+          ></path>
+          <path
+            d="M48 18 Q36 48 48 80 Q54 98 52 116 Q50 130 44 142 Q42 146 48 146 H82 Q88 146 86 140 Q80 126 78 116 Q76 98 84 80 Q94 48 76 18 Z"
+            fill="none"
+            stroke="rgba(255,255,255,0.75)"
+            stroke-width="4"
+          ></path>
+          <rect x="76" y="14" width="6" height="70" rx="3" fill="#facc15"></rect>
+          <circle cx="79" cy="18" r="9" fill="#34d399"></circle>
+          <ellipse cx="64" cy="148" rx="26" ry="6" fill="rgba(148,163,184,0.45)"></ellipse>
+        </svg>
+      </div>
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="admin-rocks" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#0ea5e9" />
+            </linearGradient>
+          </defs>
+          <rect x="26" y="54" width="68" height="66" rx="12" fill="rgba(255,255,255,0.65)" stroke="rgba(255,255,255,0.8)" stroke-width="4"></rect>
+          <rect x="32" y="62" width="56" height="44" rx="10" fill="url(#admin-rocks)" opacity="0.9"></rect>
+          <rect x="40" y="70" width="18" height="18" rx="4" fill="rgba(255,255,255,0.65)"></rect>
+          <rect x="66" y="76" width="18" height="18" rx="4" fill="rgba(255,255,255,0.4)"></rect>
+          <ellipse cx="60" cy="132" rx="28" ry="6" fill="rgba(148,163,184,0.45)"></ellipse>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout admin-layout">
+    <section id="loginSection" class="card">
+      <h2>Admin Access</h2>
+      <p>Enter the admin password to edit the question set. Changes apply only to this browser.</p>
+      <p id="storageNotice" class="question-meta"></p>
+      <form id="loginForm" class="login-form">
+        <label for="adminPassword">Password</label>
+        <div class="form-row">
+          <input id="adminPassword" name="adminPassword" type="password" placeholder="Password" autocomplete="current-password" />
+          <button type="submit" class="primary">Unlock editor</button>
+        </div>
+      </form>
+      <p id="loginFeedback" class="form-feedback" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="editorSection" class="card hidden">
+      <div class="editor-heading">
+        <div>
+          <h2>Question Set Manager</h2>
+          <p id="editorStatus" class="question-meta"></p>
+        </div>
+        <button id="restoreDefaultsButton" class="link-button">Restore default deck</button>
+      </div>
+      <div class="admin-utilities">
+        <button id="addQuestionButton" class="secondary">Add a new question</button>
+        <button id="discardChangesButton" class="link-button">Discard unsaved edits</button>
+      </div>
+      <div id="questionList" class="question-list"></div>
+      <p class="admin-hint">Each question needs at least two answer options. Mark the correct one before saving.</p>
+      <div class="editor-footer">
+        <button id="saveChangesButton" class="primary" disabled>Save changes</button>
+        <p id="saveFeedback" class="save-feedback" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p><a href="index.html">Return to the player quiz</a></p>
+  </footer>
+
+  <script src="data-store.js" defer></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>

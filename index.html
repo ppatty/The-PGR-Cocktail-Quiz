@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The PGR Cocktail Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1>The PGR Cocktail Quiz</h1>
+    <p class="tagline">Test your cocktail knowledge, then compare your score with everyone else.</p>
+    <div class="cocktail-strip" aria-hidden="true">
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="martini-liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fde68a" />
+              <stop offset="100%" stop-color="#f97316" />
+            </linearGradient>
+          </defs>
+          <polygon points="24 22 96 22 60 74" fill="url(#martini-liquid)" opacity="0.85"></polygon>
+          <polygon points="24 22 96 22 60 74" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="4"></polygon>
+          <line x1="60" y1="74" x2="60" y2="128" stroke="rgba(255,255,255,0.85)" stroke-width="6" stroke-linecap="round"></line>
+          <ellipse cx="60" cy="140" rx="24" ry="8" fill="rgba(148,163,184,0.45)"></ellipse>
+          <line x1="60" y1="74" x2="102" y2="36" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"></line>
+          <circle cx="98" cy="40" r="7" fill="#22c55e"></circle>
+        </svg>
+      </div>
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="sunset-liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f472b6" />
+              <stop offset="100%" stop-color="#9333ea" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M48 18 Q36 48 48 80 Q54 98 52 116 Q50 130 44 142 Q42 146 48 146 H82 Q88 146 86 140 Q80 126 78 116 Q76 98 84 80 Q94 48 76 18 Z"
+            fill="url(#sunset-liquid)"
+            opacity="0.82"
+          ></path>
+          <path
+            d="M48 18 Q36 48 48 80 Q54 98 52 116 Q50 130 44 142 Q42 146 48 146 H82 Q88 146 86 140 Q80 126 78 116 Q76 98 84 80 Q94 48 76 18 Z"
+            fill="none"
+            stroke="rgba(255,255,255,0.75)"
+            stroke-width="4"
+          ></path>
+          <rect x="76" y="14" width="6" height="70" rx="3" fill="#facc15"></rect>
+          <circle cx="79" cy="18" r="9" fill="#34d399"></circle>
+          <ellipse cx="64" cy="148" rx="26" ry="6" fill="rgba(148,163,184,0.45)"></ellipse>
+        </svg>
+      </div>
+      <div class="cocktail-card">
+        <svg class="cocktail-svg" viewBox="0 0 120 160" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="rocks-liquid" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#0ea5e9" />
+            </linearGradient>
+          </defs>
+          <rect x="26" y="54" width="68" height="66" rx="12" fill="rgba(255,255,255,0.65)" stroke="rgba(255,255,255,0.8)" stroke-width="4"></rect>
+          <rect x="32" y="62" width="56" height="44" rx="10" fill="url(#rocks-liquid)" opacity="0.9"></rect>
+          <rect x="40" y="70" width="18" height="18" rx="4" fill="rgba(255,255,255,0.65)"></rect>
+          <rect x="66" y="76" width="18" height="18" rx="4" fill="rgba(255,255,255,0.4)"></rect>
+          <ellipse cx="60" cy="132" rx="28" ry="6" fill="rgba(148,163,184,0.45)"></ellipse>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section id="intro" class="card">
+      <h2>How to Play</h2>
+      <ol class="instructions">
+        <li>Press <strong>Start the Quiz</strong> to begin your individual attempt.</li>
+        <li>Choose the best answer for each question. You will receive instant feedback.</li>
+        <li>When you finish, add your name to the shared leaderboard to see how you rank.</li>
+      </ol>
+      <p id="questionCount" class="question-meta">This quiz currently pulls from 10 questions.</p>
+      <p id="questionSource" class="question-meta">Using the default cocktail trivia deck curated by PGR.</p>
+      <button id="startButton" class="primary">Start the Quiz</button>
+    </section>
+
+    <section id="quiz" class="card hidden" aria-live="polite">
+      <div class="quiz-header">
+        <h2 id="questionTitle">Question</h2>
+        <span id="questionProgress" class="quiz-progress"></span>
+      </div>
+      <p id="questionText" class="question-text"></p>
+      <div id="options" class="options" role="group" aria-label="Quiz answer choices"></div>
+      <p id="explanation" class="explanation" aria-live="assertive"></p>
+      <div class="quiz-footer">
+        <button id="nextButton" class="primary" disabled>Next Question</button>
+      </div>
+    </section>
+
+    <section id="results" class="card hidden">
+      <h2>Your Results</h2>
+      <p id="resultSummary" class="result-summary"></p>
+      <p id="resultDetails" class="result-details"></p>
+      <form id="scoreForm" class="score-form">
+        <label for="playerName">Add yourself to the leaderboard:</label>
+        <div class="form-row">
+          <input id="playerName" name="playerName" type="text" placeholder="Your name" maxlength="30" autocomplete="name" />
+          <button type="submit" class="primary">Submit Score</button>
+        </div>
+      </form>
+      <p id="scoreSubmittedMessage" class="score-submitted hidden" role="status"></p>
+      <div class="results-actions">
+        <button id="playAgainButton" class="secondary">Play Again</button>
+      </div>
+    </section>
+
+    <section id="leaderboard" class="card">
+      <div class="leaderboard-header">
+        <h2>Community Leaderboard</h2>
+        <p class="leaderboard-description">Every completed quiz can be added to this ranked list. Share the data to compare results with friends or colleagues.</p>
+      </div>
+      <div id="storageWarning" class="storage-warning hidden" role="status"></div>
+      <div class="leaderboard-table-wrapper">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Participant</th>
+              <th scope="col">Score</th>
+              <th scope="col">Time (s)</th>
+              <th scope="col">Completed</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+        <p id="emptyLeaderboard" class="empty-leaderboard">No scores yet. Be the first to complete the quiz!</p>
+      </div>
+      <div class="leaderboard-actions">
+        <button id="exportButton" class="secondary">Export leaderboard data</button>
+        <button id="importButton" class="secondary">Import shared data</button>
+        <button id="resetButton" class="link-button">Reset leaderboard</button>
+      </div>
+      <p class="leaderboard-note">Share results by copying the exported data and sending it to other players. They can import it to merge everyone&#39;s scores.</p>
+      <p id="leaderboardStatus" class="leaderboard-status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>
+      Built for the PGR Cocktail Quiz challenge.
+      <span class="admin-entry">Admin? <a href="admin.html">Manage the question set</a>.</span>
+    </p>
+  </footer>
+
+  <script src="data-store.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
